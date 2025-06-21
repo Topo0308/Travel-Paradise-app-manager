@@ -1,73 +1,131 @@
-# Welcome to your Lovable project
 
-## Project info
+# Travel Paradise - Application Mobile de Gestion Touristique
 
-**URL**: https://lovable.dev/projects/5c2557bf-91d2-475f-93a1-896361a8ce48
+## 🌍 Description
+Travel Paradise est une application mobile centralisée pour la gestion des visites touristiques à l'échelle internationale.
 
-## How can I edit this code?
+## 🏗️ Architecture
+- **Frontend**: React Native avec Expo
+- **Backend**: Symfony 6.3 (API REST)
+- **Base de données**: PostgreSQL
+- **Conteneurisation**: Docker
 
-There are several ways of editing your application.
+## 🚀 Installation et lancement
 
-**Use Lovable**
+### Prérequis
+- Docker et Docker Compose
+- Node.js 18+ (pour le développement local)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5c2557bf-91d2-475f-93a1-896361a8ce48) and start prompting.
+### Lancement avec Docker
+```bash
+# Cloner le projet
+git clone <repository-url>
+cd travel-paradise
 
-Changes made via Lovable will be committed automatically to this repo.
+# Lancer tous les services
+docker-compose up -d
 
-**Use your preferred IDE**
+# Créer la base de données (première fois)
+docker-compose exec backend php bin/console doctrine:database:create
+docker-compose exec backend php bin/console doctrine:migrations:migrate
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Charger les données de test
+docker-compose exec postgres psql -U admin -d travel_paradise -f /migrations/001_initial_schema.sql
 ```
 
-**Edit a file directly in GitHub**
+### Accès aux services
+- **Frontend Mobile**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **PostgreSQL**: localhost:5432
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 👤 Comptes de test
 
-**Use GitHub Codespaces**
+### Guide
+- Email: jean.dupont@travelparadise.com
+- Mot de passe: password123
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Administrateur  
+- Email: admin@travelparadise.com
+- Mot de passe: admin123
 
-## What technologies are used for this project?
+### Visiteur
+- Email: pierre@email.com
+- Mot de passe: visiteur123
 
-This project is built with:
+## 📱 Fonctionnalités
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Guide
+- ✅ Consultation du calendrier des visites
+- ✅ Gestion de la liste d'appel
+- ✅ Clôture des visites avec commentaires
 
-## How can I deploy this project?
+### Administrateur
+- ✅ Vue d'ensemble des guides
+- ✅ Gestion des visites
+- ✅ Statistiques détaillées
 
-Simply open [Lovable](https://lovable.dev/projects/5c2557bf-91d2-475f-93a1-896361a8ce48) and click on Share -> Publish.
+### Visiteur
+- ✅ Recherche et consultation des visites
+- ✅ Réservation de créneaux
+- ✅ Évaluation des visites
 
-## Can I connect a custom domain to my Lovable project?
+## 🗺️ Lieux intégrés
+- 🏖️ Plages (Blankenberge, Belgique)
+- 🏰 Villes historiques (Bruges, Belgique)
+- ⛰️ Montagnes (Atlas, Maroc)
+- 🖼️ Musées (Louvre, France)
+- 🌉 Monuments (Tour Eiffel, France)
+- 🏞️ Parcs nationaux (Yosemite, USA)
+- 🕌 Sites historiques (Petra, Jordanie)
 
-Yes, you can!
+## 🔧 Développement
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Backend (Symfony)
+```bash
+cd backend
+composer install
+symfony server:start
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Frontend (React Native)
+```bash
+cd frontend
+npm install
+npm start
+```
+
+## 📚 API Endpoints
+
+### Authentification
+- POST `/api/auth/login` - Connexion
+- POST `/api/auth/register` - Inscription
+
+### Visites
+- GET `/api/visites` - Liste des visites
+- GET `/api/visites/guide/{id}` - Visites d'un guide
+- POST `/api/visites/{id}/cloturer` - Clôturer une visite
+- POST `/api/visites` - Créer une visite
+
+### Guides
+- GET `/api/guides` - Liste des guides
+- POST `/api/guides` - Créer un guide
+
+## 🐳 Structure Docker
+```
+travel-paradise/
+├── docker-compose.yml
+├── backend/
+│   ├── Dockerfile
+│   └── src/
+├── frontend/
+│   ├── Dockerfile
+│   └── screens/
+└── README.md
+```
+
+## 📈 Prochaines fonctionnalités
+- 🔔 Notifications push
+- 🗺️ Géolocalisation en temps réel
+- 💳 Système de paiement intégré
+- 📊 Analytics avancées
+- 🌐 Support multilingue
