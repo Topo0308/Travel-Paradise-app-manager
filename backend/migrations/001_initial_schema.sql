@@ -49,4 +49,5 @@ INSERT INTO utilisateur (prenom, nom, email, role, mot_de_passe) VALUES
 INSERT INTO visite (lieu, pays, debut, fin, guide_id, type_activite, statut) VALUES
 ('Tour Eiffel', 'France', '2024-12-25 10:00:00', '2024-12-25 12:00:00', 1, 'monument', 'planifiee'),
 ('Centre historique de Bruges', 'Belgique', '2024-12-26 14:00:00', '2024-12-26 17:00:00', 2, 'ville', 'planifiee'),
-('Montagnes de l\'Atlas', 'Maroc', '2024-12-27 08:00:00', '2024-12-27 18:00:00', 3, 'montagne', 'planifiee');
+('Montagnes de l''Atlas', 'Maroc', '2024-12-27 08:00:00', '2024-12-27 18:00:00', 3, 'montagne', 'planifiee');
+

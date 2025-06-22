@@ -1,15 +1,22 @@
-
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { TextInput, Button, Card, Title, Paragraph } from 'react-native-paper';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://192.168.129.33:8000/api';
 
 export default function LoginScreen({ navigation }) {
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  // États communs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // États inscription
+  const [prenom, setPrenom] = useState('');
+  const [nom, setNom] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -51,41 +58,132 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
+  const handleRegister = () => {
+    if (!prenom || !nom || !email || !password || !confirmPassword) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Erreur', 'Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    // Ici, tu peux appeler ton API d'inscription, ou faire autre chose
+    Alert.alert('Succès', 'Compte créé ! Vous pouvez maintenant vous connecter.');
+
+    // Reset et retour au login
+    setIsRegistering(false);
+    setPrenom('');
+    setNom('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+  };
+
   return (
     <View style={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
           <Title style={styles.title}>🌍 Travel Paradise</Title>
-          <Paragraph style={styles.subtitle}>Connexion à votre espace</Paragraph>
-          
-          <TextInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            mode="outlined"
-            style={styles.input}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          
-          <TextInput
-            label="Mot de passe"
-            value={password}
-            onChangeText={setPassword}
-            mode="outlined"
-            style={styles.input}
-            secureTextEntry
-          />
-          
-          <Button
-            mode="contained"
-            onPress={handleLogin}
-            loading={loading}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-          >
-            Se connecter
-          </Button>
+          <Paragraph style={styles.subtitle}>
+            {isRegistering ? 'Créer un nouveau compte' : 'Connexion à votre espace'}
+          </Paragraph>
+
+          {isRegistering ? (
+            <>
+              <TextInput
+                label="Prénom"
+                value={prenom}
+                onChangeText={setPrenom}
+                mode="outlined"
+                style={styles.input}
+              />
+              <TextInput
+                label="Nom"
+                value={nom}
+                onChangeText={setNom}
+                mode="outlined"
+                style={styles.input}
+              />
+              <TextInput
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                mode="outlined"
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TextInput
+                label="Mot de passe"
+                value={password}
+                onChangeText={setPassword}
+                mode="outlined"
+                style={styles.input}
+                secureTextEntry
+              />
+              <TextInput
+                label="Confirmer le mot de passe"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                mode="outlined"
+                style={styles.input}
+                secureTextEntry
+              />
+              <Button
+                mode="contained"
+                onPress={handleRegister}
+                loading={loading}
+                style={styles.button}
+                contentStyle={styles.buttonContent}
+              >
+                Créer le compte
+              </Button>
+              <Button
+                mode="text"
+                onPress={() => setIsRegistering(false)}
+                style={styles.button}
+              >
+                Retour à la connexion
+              </Button>
+            </>
+          ) : (
+            <>
+              <TextInput
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                mode="outlined"
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TextInput
+                label="Mot de passe"
+                value={password}
+                onChangeText={setPassword}
+                mode="outlined"
+                style={styles.input}
+                secureTextEntry
+              />
+              <Button
+                mode="contained"
+                onPress={handleLogin}
+                loading={loading}
+                style={styles.button}
+                contentStyle={styles.buttonContent}
+              >
+                Se connecter
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => setIsRegistering(true)}
+                style={styles.button}
+              >
+                Créer un compte
+              </Button>
+            </>
+          )}
         </Card.Content>
       </Card>
     </View>

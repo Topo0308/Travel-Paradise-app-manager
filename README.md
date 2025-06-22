@@ -36,7 +36,10 @@ docker-compose exec postgres psql -U admin -d travel_paradise -f /migrations/001
 ### Accès aux services
 - **Frontend Mobile**: http://localhost:3000
 - **Backend API**: http://localhost:8000
-- **PostgreSQL**: localhost:5432
+- **PostgreSQL**: localhost:5432   
+# docker exec -it tour-vista-app-manager-postgres-1 psql -U admin -d travel_paradise
+
+
 
 ## 👤 Comptes de test
 

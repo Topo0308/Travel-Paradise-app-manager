@@ -27,7 +27,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "19000:19000"
     depends_on:
       - backend
     volumes:

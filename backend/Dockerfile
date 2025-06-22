@@ -33,6 +33,9 @@ RUN composer install
 # Permissions
 RUN chown -R www-data:www-data /var/www/html
 
+RUN usermod -u 1000 www-data
+
 EXPOSE 8000
 
-CMD ["symfony", "server:start", "--host=0.0.0.0", "--port=8000"]
+CMD ["symfony", "server:start", "--no-tls", "--port=8000", "--allow-cors", "--dir=public", "--allow-all-ip"]
+

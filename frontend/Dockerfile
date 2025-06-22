@@ -15,6 +15,6 @@ RUN npm install
 # Copie du code source
 COPY . .
 
-EXPOSE 3000
+EXPOSE 19000
 
 CMD ["npm", "start"]
