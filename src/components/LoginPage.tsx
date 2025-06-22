@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { buildApiUrl, API_CONFIG } from '@/config/api';
+import { buildApiUrl, API_CONFIG, API_OPTIONS } from '@/config/api';
 
 interface User {
   id: number;
@@ -48,26 +47,34 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
     setLoading(true);
     setError('');
+    
+    console.log('Tentative de connexion...', { email, url: buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN) });
 
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        ...API_OPTIONS,
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Réponse reçue:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Données reçues:', data);
 
       if (data.success) {
+        console.log('Connexion réussie:', data.user);
         onLogin(data.user);
       } else {
         setError(data.message || 'Identifiants incorrects');
       }
     } catch (error) {
       console.error('Erreur de connexion:', error);
-      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré.');
+      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré sur le port 8000.');
     } finally {
       setLoading(false);
     }
@@ -90,12 +97,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setLoading(true);
     setError('');
 
+    console.log('Tentative d\'inscription...', { prenom, nom, email });
+
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.REGISTER), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        ...API_OPTIONS,
         body: JSON.stringify({
           prenom,
           nom,
@@ -105,7 +112,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         }),
       });
 
+      console.log('Réponse inscription:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Données inscription:', data);
 
       if (data.success) {
         setSuccess('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
@@ -122,39 +136,29 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       }
     } catch (error) {
       console.error('Erreur d\'inscription:', error);
-      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré.');
+      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré sur le port 8000.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = (role: 'admin' | 'guide' | 'visiteur') => {
-    const demoUsers = {
-      admin: {
-        id: 1,
-        prenom: 'Admin',
-        nom: 'System',
-        email: 'admin@travel.com',
-        role: 'admin' as const
-      },
-      guide: {
-        id: 2,
-        prenom: 'Marie',
-        nom: 'Dubois',
-        email: 'marie@travel.com',
-        role: 'guide' as const,
-        paysAffectation: 'France'
-      },
-      visiteur: {
-        id: 3,
-        prenom: 'Jean',
-        nom: 'Martin',
-        email: 'jean@travel.com',
-        role: 'visiteur' as const
-      }
-    };
-    onLogin(demoUsers[role]);
+  const testConnection = async () => {
+    try {
+      console.log('Test de connexion au backend...');
+      const response = await fetch('http://localhost:8000/api', {
+        method: 'GET',
+        ...API_OPTIONS,
+      });
+      console.log('Test de connexion:', response.status, response.statusText);
+    } catch (error) {
+      console.error('Test de connexion échoué:', error);
+    }
   };
+
+  // Test de connexion au montage du composant
+  React.useEffect(() => {
+    testConnection();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center p-4">
@@ -287,39 +291,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               >
                 Créer un compte
               </Button>
-
-              <div className="pt-4 border-t">
-                <p className="text-sm text-gray-600 mb-2">Comptes de démonstration :</p>
-                <div className="space-y-2">
-                  <Button 
-                    type="button" 
-                    variant="secondary" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => handleDemoLogin('admin')}
-                  >
-                    🔧 Connexion Admin
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="secondary" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => handleDemoLogin('guide')}
-                  >
-                    🗺️ Connexion Guide
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="secondary" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => handleDemoLogin('visiteur')}
-                  >
-                    🎒 Connexion Visiteur
-                  </Button>
-                </div>
-              </div>
             </form>
           )}
         </CardContent>
