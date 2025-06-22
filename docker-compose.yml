@@ -33,9 +33,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "19000:19000"  # Expo Dev Server
-      - "19001:19001"  # Expo Dev Tools
-      - "19002:19002"  # Metro Bundler
+      - "3000:19000"   # Port web principal changé de 19000 à 3000
+      - "3001:19001"   # Port dev tools changé de 19001 à 3001
+      - "3002:19002"   # Port metro bundler changé de 19002 à 3002
     depends_on:
       - backend
     environment:
