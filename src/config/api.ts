@@ -1,6 +1,6 @@
-// Configuration API pour l'environnement local
+// Configuration API pour l'environnement Docker
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:8000/api', // Backend local Docker
+  BASE_URL: 'http://192.168.129.33:8000/api', // Backend Docker IP
   ENDPOINTS: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
@@ -20,5 +20,5 @@ export const API_OPTIONS = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  credentials: 'omit' as RequestCredentials,
+  mode: 'cors' as RequestMode,
 };

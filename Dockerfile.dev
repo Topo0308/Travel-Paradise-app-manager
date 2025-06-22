@@ -1,19 +1,16 @@
-FROM node:18
-
 WORKDIR /app
 
-# Installation des dépendances
+# Copier les fichiers de dépendances
 COPY package*.json ./
+
+# Installer les dépendances
 RUN npm install
 
-# Copie du code source
+# Copier le reste du code
 COPY . .
 
-# Exposition du port pour le serveur de développement
+# Exposer le port 3000 pour Vite
 EXPOSE 3000
 
-# Variables d'environnement
-ENV NODE_ENV=development
-
-# Commande de démarrage
+# Démarrer l'application React avec Vite
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
