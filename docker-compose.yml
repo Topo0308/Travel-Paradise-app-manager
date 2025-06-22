@@ -12,6 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - travel_network
 
   backend:
     build: ./backend
@@ -23,16 +25,31 @@ services:
       DATABASE_URL: postgresql://admin:password@postgres:5432/travel_paradise
     volumes:
       - ./backend:/var/www/html
+    networks:
+      - travel_network
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     ports:
-      - "19000:19000"
+      - "19000:19000"  # Expo Dev Server
+      - "19001:19001"  # Expo Dev Tools
+      - "19002:19002"  # Metro Bundler
     depends_on:
       - backend
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - API_BASE_URL=http://backend:8000/api
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    networks:
+      - travel_network
 
 volumes:
   postgres_data:
+
+networks:
+  travel_network:
+    driver: bridge

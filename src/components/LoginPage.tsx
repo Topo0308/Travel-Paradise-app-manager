@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { MapPin, Users, Calendar } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { buildApiUrl, API_CONFIG } from '@/config/api';
 
 interface User {
   id: number;
@@ -19,228 +20,307 @@ interface LoginPageProps {
   onLogin: (user: User) => void;
 }
 
-const LoginPage = ({ onLogin }: LoginPageProps) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  // États connexion
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [prenom, setPrenom] = useState('');
-  const [nom, setNom] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Comptes de démonstration
-  const demoAccounts = [
-    { email: 'jean.dupont@travelparadise.com', password: 'password123', role: 'guide' as const },
-    { email: 'admin@travelparadise.com', password: 'admin123', role: 'admin' as const },
-    { email: 'pierre@email.com', password: 'visiteur123', role: 'visiteur' as const }
-  ];
+  // États inscription
+  const [registerData, setRegisterData] = useState({
+    prenom: '',
+    nom: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
-  const handleLogin = () => {
-    const account = demoAccounts.find(acc => acc.email === email && acc.password === password);
-    
-    if (account) {
-      const user: User = {
-        id: 1,
-        prenom: account.role === 'guide' ? 'Jean' : account.role === 'admin' ? 'Marie' : 'Pierre',
-        nom: account.role === 'guide' ? 'Dupont' : account.role === 'admin' ? 'Martin' : 'Durand',
-        email: account.email,
-        role: account.role,
-        paysAffectation: account.role === 'guide' ? 'France' : undefined
-      };
-      onLogin(user);
-    } else {
-      alert('Identifiants incorrects');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setError('Veuillez remplir tous les champs');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        onLogin(data.user);
+      } else {
+        setError(data.message || 'Identifiants incorrects');
+      }
+    } catch (error) {
+      console.error('Erreur de connexion:', error);
+      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { prenom, nom, email, password, confirmPassword } = registerData;
+
     if (!prenom || !nom || !email || !password || !confirmPassword) {
-      alert('Veuillez remplir tous les champs');
+      setError('Veuillez remplir tous les champs');
       return;
     }
 
     if (password !== confirmPassword) {
-      alert('Les mots de passe ne correspondent pas');
+      setError('Les mots de passe ne correspondent pas');
       return;
     }
 
-    if (demoAccounts.find(acc => acc.email === email)) {
-      alert('Un compte avec cet email existe déjà');
-      return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.REGISTER), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prenom,
+          nom,
+          email,
+          password,
+          role: 'visiteur'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+        setIsRegistering(false);
+        setRegisterData({
+          prenom: '',
+          nom: '',
+          email: '',
+          password: '',
+          confirmPassword: ''
+        });
+      } else {
+        setError(data.message || 'Erreur lors de la création du compte');
+      }
+    } catch (error) {
+      console.error('Erreur d\'inscription:', error);
+      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré.');
+    } finally {
+      setLoading(false);
     }
-
-    // Créer un nouveau compte visiteur
-    const newUser: User = {
-      id: Date.now(), // ID temporaire
-      prenom,
-      nom,
-      email,
-      role: 'visiteur'
-    };
-
-    alert('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
-    
-    // Revenir au mode connexion
-    setIsRegistering(false);
-    setPrenom('');
-    setNom('');
-    setConfirmPassword('');
-    setPassword('');
-    setEmail('');
   };
 
-  const fillDemo = (role: 'guide' | 'admin' | 'visiteur') => {
-    const account = demoAccounts.find(acc => acc.role === role)!;
-    setEmail(account.email);
-    setPassword(account.password);
+  const handleDemoLogin = (role: 'admin' | 'guide' | 'visiteur') => {
+    const demoUsers = {
+      admin: {
+        id: 1,
+        prenom: 'Admin',
+        nom: 'System',
+        email: 'admin@travel.com',
+        role: 'admin' as const
+      },
+      guide: {
+        id: 2,
+        prenom: 'Marie',
+        nom: 'Dubois',
+        email: 'marie@travel.com',
+        role: 'guide' as const,
+        paysAffectation: 'France'
+      },
+      visiteur: {
+        id: 3,
+        prenom: 'Jean',
+        nom: 'Martin',
+        email: 'jean@travel.com',
+        role: 'visiteur' as const
+      }
+    };
+    onLogin(demoUsers[role]);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-blue-600 p-3 rounded-full">
-              <MapPin className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Travel Paradise</CardTitle>
-          <CardDescription>
-            {isRegistering ? 'Créer un nouveau compte' : 'Application de Gestion Touristique'}
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold text-blue-600">
+            🌍 Travel Paradise
+          </CardTitle>
+          <p className="text-gray-600">
+            {isRegistering ? 'Créer un nouveau compte' : 'Connexion à votre espace'}
+          </p>
         </CardHeader>
+
         <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {success && (
+            <Alert>
+              <AlertDescription className="text-green-600">{success}</AlertDescription>
+            </Alert>
+          )}
+
           {isRegistering ? (
-            // Formulaire d'inscription
-            <>
-              <div className="space-y-2">
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
                 <Label htmlFor="prenom">Prénom</Label>
                 <Input
                   id="prenom"
                   type="text"
-                  value={prenom}
-                  onChange={(e) => setPrenom(e.target.value)}
-                  placeholder="Votre prénom"
+                  value={registerData.prenom}
+                  onChange={(e) => setRegisterData({...registerData, prenom: e.target.value})}
+                  required
                 />
               </div>
-              <div className="space-y-2">
+
+              <div>
                 <Label htmlFor="nom">Nom</Label>
                 <Input
                   id="nom"
                   type="text"
-                  value={nom}
-                  onChange={(e) => setNom(e.target.value)}
-                  placeholder="Votre nom"
+                  value={registerData.nom}
+                  onChange={(e) => setRegisterData({...registerData, nom: e.target.value})}
+                  required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+
+              <div>
+                <Label htmlFor="register-email">Email</Label>
                 <Input
-                  id="email"
+                  id="register-email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="votre@email.com"
+                  value={registerData.email}
+                  onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
+                  required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+
+              <div>
+                <Label htmlFor="register-password">Mot de passe</Label>
                 <Input
-                  id="password"
+                  id="register-password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  value={registerData.password}
+                  onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                  required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+
+              <div>
+                <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
                 <Input
-                  id="confirmPassword"
+                  id="confirm-password"
                   type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
+                  value={registerData.confirmPassword}
+                  onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
+                  required
                 />
               </div>
-              <Button onClick={handleRegister} className="w-full">
-                Créer le compte
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Création...' : 'Créer le compte'}
               </Button>
+
               <Button 
+                type="button" 
                 variant="outline" 
-                onClick={() => setIsRegistering(false)} 
                 className="w-full"
+                onClick={() => setIsRegistering(false)}
               >
                 Retour à la connexion
               </Button>
-            </>
+            </form>
           ) : (
-            // Formulaire de connexion
-            <>
-              <div className="space-y-2">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="votre@email.com"
+                  required
                 />
               </div>
-              <div className="space-y-2">
+
+              <div>
                 <Label htmlFor="password">Mot de passe</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  required
                 />
               </div>
-              <Button onClick={handleLogin} className="w-full">
-                Se connecter
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Connexion...' : 'Se connecter'}
               </Button>
-              
+
               <Button 
+                type="button" 
                 variant="outline" 
-                onClick={() => setIsRegistering(true)} 
                 className="w-full"
+                onClick={() => setIsRegistering(true)}
               >
                 Créer un compte
               </Button>
-              
-              <div className="mt-6 border-t pt-4">
-                <p className="text-sm text-gray-600 text-center mb-3">Comptes de démonstration :</p>
+
+              <div className="pt-4 border-t">
+                <p className="text-sm text-gray-600 mb-2">Comptes de démonstration :</p>
                 <div className="space-y-2">
                   <Button 
-                    variant="outline" 
+                    type="button" 
+                    variant="secondary" 
                     size="sm" 
-                    onClick={() => fillDemo('guide')}
-                    className="w-full text-left justify-start"
+                    className="w-full"
+                    onClick={() => handleDemoLogin('admin')}
                   >
-                    <Users className="h-4 w-4 mr-2" />
-                    Guide - Jean Dupont
+                    🔧 Connexion Admin
                   </Button>
                   <Button 
-                    variant="outline" 
+                    type="button" 
+                    variant="secondary" 
                     size="sm" 
-                    onClick={() => fillDemo('admin')}
-                    className="w-full text-left justify-start"
+                    className="w-full"
+                    onClick={() => handleDemoLogin('guide')}
                   >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Admin - Marie Martin
+                    🗺️ Connexion Guide
                   </Button>
                   <Button 
-                    variant="outline" 
+                    type="button" 
+                    variant="secondary" 
                     size="sm" 
-                    onClick={() => fillDemo('visiteur')}
-                    className="w-full text-left justify-start"
+                    className="w-full"
+                    onClick={() => handleDemoLogin('visiteur')}
                   >
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Visiteur - Pierre Durand
+                    🎒 Connexion Visiteur
                   </Button>
                 </div>
               </div>
-            </>
+            </form>
           )}
         </CardContent>
       </Card>
