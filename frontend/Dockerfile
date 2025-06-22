@@ -1,20 +1,20 @@
-
 FROM node:18
 
 WORKDIR /app
 
-# Installation d'Expo CLI
-RUN npm install -g @expo/cli
+# Install Expo CLI globally
+RUN npm install -g expo-cli
 
-# Copie des fichiers package
-COPY package*.json ./
+# Copie uniquement les fichiers package depuis le frontend
+COPY frontend/package*.json ./
 
-# Installation des dépendances
-RUN npm install
+# Install dependencies (frontend only)
+RUN npm install --legacy-peer-deps
 
-# Copie du code source
-COPY . .
+# Copier le code source
+COPY frontend ./
 
-EXPOSE 19000
+# Expose Expo ports
+EXPOSE 19000 19001 19002
 
-CMD ["npm", "start"]
+CMD ["expo", "start", "--tunnel", "--non-interactive"]
