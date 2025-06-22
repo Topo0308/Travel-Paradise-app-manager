@@ -229,4 +229,3 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToLogin, onRegisterSu
   );
 };
 
-export default RegisterPage;

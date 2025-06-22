@@ -150,7 +150,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               <AlertDescription className="text-green-600">{success}</AlertDescription>
             </Alert>
           )}
-
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>

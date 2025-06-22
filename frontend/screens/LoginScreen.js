@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { TextInput, Button, Card, Title, Paragraph } from 'react-native-paper';
@@ -135,6 +136,15 @@ export default function LoginScreen({ navigation }) {
           <Paragraph style={styles.subtitle}>
             {isRegistering ? 'Créer un nouveau compte' : 'Connexion à votre espace'}
           </Paragraph>
+
+          {!isRegistering && (
+            <View style={styles.testAccountsContainer}>
+              <Paragraph style={styles.testAccountsTitle}>Comptes de test :</Paragraph>
+              <Paragraph style={styles.testAccountsText}>Admin: admin@test.com / password</Paragraph>
+              <Paragraph style={styles.testAccountsText}>Guide: guide@test.com / password</Paragraph>
+              <Paragraph style={styles.testAccountsText}>Visiteur: visiteur@test.com / password</Paragraph>
+            </View>
+          )}
 
           {isRegistering ? (
             <>
