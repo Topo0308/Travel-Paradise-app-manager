@@ -1,25 +1,24 @@
-
 FROM node:18
 
 WORKDIR /app
 
-# Installation des dépendances
+# Copier seulement package.json + package-lock.json / yarn.lock
 COPY package*.json ./
-RUN npm install
 
-# Installation d'Expo CLI globalement
-RUN npm install -g @expo/cli
+# Installer dépendances avec legacy-peer-deps pour éviter conflits
+RUN npm install --legacy-peer-deps
 
-# Copie du code source
+# Installer expo-cli globalement
+RUN npm install -g expo-cli
+
+# Copier le reste du code (pour dev, on peut aussi monter en volume via docker-compose)
 COPY . .
 
-# Exposition du port pour le serveur de développement
-EXPOSE 19000
-EXPOSE 19001
-EXPOSE 19002
+# Exposer les ports d'Expo
+EXPOSE 19000 19001 19002
 
-# Variables d'environnement pour Expo
+# Variable environnement pour Expo
 ENV EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
 
-# Commande de démarrage
-CMD ["npm", "start"]
+# Commande pour démarrer Expo en mode tunnel et non interactif
+CMD ["expo", "start", "--tunnel", "--non-interactive"]
