@@ -4,20 +4,22 @@ FROM node:18
 WORKDIR /app
 
 # Installer les dépendances
-COPY frontend/package*.json ./
+COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
 # Installer Expo CLI globalement
 RUN npm install -g expo-cli
 
 # Copier le code source
-COPY frontend ./
+COPY . .
 
 # Définir l'adresse pour le tunnel (devtools)
 ENV EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
 
 # Exposer les ports Expo
 EXPOSE 19000 19001 19002 19004
+
+RUN npm install -g @expo/ngrok
 
 # Démarrer Expo en mode tunnel
 CMD ["npx", "expo", "start", "--tunnel", "--non-interactive"]

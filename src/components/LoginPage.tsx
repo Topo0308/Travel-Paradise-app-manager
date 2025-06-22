@@ -48,7 +48,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setLoading(true);
     setError('');
     
-    console.log('Tentative de connexion...', { email, url: buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN) });
+    console.log('Tentative de connexion...', { 
+      email, 
+      url: buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN),
+      backend_ip: '192.168.129.33:8000'
+    });
 
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN), {
@@ -57,24 +61,29 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log('Réponse reçue:', response.status, response.statusText);
+      console.log('Réponse du serveur:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
       
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+        throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('Données reçues:', data);
+      console.log('Données reçues du backend:', data);
 
-      if (data.success) {
-        console.log('Connexion réussie:', data.user);
+      if (data.success && data.user) {
+        console.log('Connexion réussie pour:', data.user);
         onLogin(data.user);
+        setSuccess('Connexion réussie !');
       } else {
         setError(data.message || 'Identifiants incorrects');
       }
     } catch (error) {
-      console.error('Erreur de connexion:', error);
-      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré sur le port 8000.');
+      console.error('Erreur de connexion détaillée:', error);
+      setError(`Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
     }
@@ -97,7 +106,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     setLoading(true);
     setError('');
 
-    console.log('Tentative d\'inscription...', { prenom, nom, email });
+    console.log('Tentative d\'inscription...', { 
+      prenom, 
+      nom, 
+      email,
+      url: buildApiUrl(API_CONFIG.ENDPOINTS.REGISTER)
+    });
 
     try {
       const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.REGISTER), {
@@ -112,10 +126,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         }),
       });
 
-      console.log('Réponse inscription:', response.status);
+      console.log('Réponse inscription:', {
+        status: response.status,
+        statusText: response.statusText
+      });
 
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+        throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -131,25 +148,32 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           password: '',
           confirmPassword: ''
         });
+        // Reset des champs de connexion
+        setEmail('');
+        setPassword('');
       } else {
         setError(data.message || 'Erreur lors de la création du compte');
       }
     } catch (error) {
-      console.error('Erreur d\'inscription:', error);
-      setError('Erreur de connexion au serveur. Vérifiez que le backend est démarré sur le port 8000.');
+      console.error('Erreur d\'inscription détaillée:', error);
+      setError(`Erreur d'inscription: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const testConnection = async () => {
+  const testBackendConnection = async () => {
     try {
       console.log('Test de connexion au backend...');
-      const response = await fetch('http://localhost:8000/api', {
+      const response = await fetch('http://192.168.129.33:8000/api', {
         method: 'GET',
         ...API_OPTIONS,
       });
-      console.log('Test de connexion:', response.status, response.statusText);
+      console.log('Test de connexion backend:', {
+        status: response.status,
+        statusText: response.statusText,
+        accessible: response.ok
+      });
     } catch (error) {
       console.error('Test de connexion échoué:', error);
     }
@@ -157,7 +181,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   // Test de connexion au montage du composant
   React.useEffect(() => {
-    testConnection();
+    testBackendConnection();
   }, []);
 
   return (
@@ -170,6 +194,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           <p className="text-gray-600">
             {isRegistering ? 'Créer un nouveau compte' : 'Connexion à votre espace'}
           </p>
+          <div className="text-xs text-gray-400 mt-2">
+            Backend: http://192.168.129.33:8000
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -183,6 +210,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <Alert>
               <AlertDescription className="text-green-600">{success}</AlertDescription>
             </Alert>
+          )}
+
+          {!isRegistering && (
+            <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
+              <strong>Comptes de test :</strong><br/>
+              Admin: admin@test.com / password<br/>
+              Guide: guide@test.com / password<br/>
+              Visiteur: visiteur@test.com / password
+            </div>
           )}
 
           {isRegistering ? (
@@ -250,7 +286,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 type="button" 
                 variant="outline" 
                 className="w-full"
-                onClick={() => setIsRegistering(false)}
+                onClick={() => {
+                  setIsRegistering(false);
+                  setError('');
+                  setSuccess('');
+                }}
               >
                 Retour à la connexion
               </Button>
@@ -265,6 +305,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  placeholder="admin@test.com"
                 />
               </div>
 
@@ -276,6 +317,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  placeholder="password"
                 />
               </div>
 
@@ -287,7 +329,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 type="button" 
                 variant="outline" 
                 className="w-full"
-                onClick={() => setIsRegistering(true)}
+                onClick={() => {
+                  setIsRegistering(true);
+                  setError('');
+                  setSuccess('');
+                }}
               >
                 Créer un compte
               </Button>
