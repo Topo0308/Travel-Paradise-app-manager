@@ -17,7 +17,7 @@ class VisiteController extends AbstractController
     public function getVisites(EntityManagerInterface $em): JsonResponse
     {
         $visites = $em->getRepository(Visite::class)->findAll();
-        
+
         $data = [];
         foreach ($visites as $visite) {
             $data[] = [
@@ -30,13 +30,13 @@ class VisiteController extends AbstractController
                 'guide' => [
                     'id' => $visite->getGuide()->getId(),
                     'prenom' => $visite->getGuide()->getPrenom(),
-                    'nom' => $visite->getGuide()->getNom()
+                    'nom' => $visite->getGuide()->getNom(),
                 ],
                 'visiteurs' => $visite->getVisiteurs(),
                 'statut' => $visite->getStatut(),
                 'typeActivite' => $visite->getTypeActivite(),
                 'note' => $visite->getNote(),
-                'commentaire' => $visite->getCommentaire()
+                'commentaire' => $visite->getCommentaire(),
             ];
         }
 
@@ -52,7 +52,7 @@ class VisiteController extends AbstractController
         }
 
         $visites = $em->getRepository(Visite::class)->findBy(['guide' => $guide]);
-        
+
         $data = [];
         foreach ($visites as $visite) {
             $data[] = [
@@ -63,7 +63,7 @@ class VisiteController extends AbstractController
                 'fin' => $visite->getFin()->format('Y-m-d H:i:s'),
                 'visiteurs' => $visite->getVisiteurs(),
                 'statut' => $visite->getStatut(),
-                'typeActivite' => $visite->getTypeActivite()
+                'typeActivite' => $visite->getTypeActivite(),
             ];
         }
 
@@ -79,11 +79,16 @@ class VisiteController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
-        
+
+        // Validation note (optionnelle)
+        if (isset($data['note']) && !is_numeric($data['note'])) {
+            return $this->json(['error' => 'Note invalide'], 400);
+        }
+
         $visite->setStatut('terminee');
         $visite->setCommentaire($data['commentaire'] ?? '');
         $visite->setNote($data['note'] ?? null);
-        
+
         $em->flush();
 
         return $this->json(['success' => true, 'message' => 'Visite clôturée avec succès']);
@@ -93,7 +98,25 @@ class VisiteController extends AbstractController
     public function createVisite(Request $request, EntityManagerInterface $em): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
+
+        $requiredFields = ['lieu', 'pays', 'debut', 'fin', 'guideId', 'typeActivite'];
+        foreach ($requiredFields as $field) {
+            if (empty($data[$field])) {
+                return $this->json(['error' => "Le champ '$field' est requis."], 400);
+            }
+        }
+
+        try {
+            $debut = new \DateTime($data['debut']);
+            $fin = new \DateTime($data['fin']);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Format de date invalide.'], 400);
+        }
+
+        if ($fin < $debut) {
+            return $this->json(['error' => 'La date de fin doit être postérieure à la date de début.'], 400);
+        }
+
         $guide = $em->getRepository(Guide::class)->find($data['guideId']);
         if (!$guide) {
             return $this->json(['error' => 'Guide non trouvé'], 404);
@@ -103,11 +126,12 @@ class VisiteController extends AbstractController
         $visite->setLieu($data['lieu']);
         $visite->setPays($data['pays']);
         $visite->setPhoto($data['photo'] ?? null);
-        $visite->setDebut(new \DateTime($data['debut']));
-        $visite->setFin(new \DateTime($data['fin']));
+        $visite->setDebut($debut);
+        $visite->setFin($fin);
         $visite->setGuide($guide);
         $visite->setVisiteurs($data['visiteurs'] ?? []);
         $visite->setTypeActivite($data['typeActivite']);
+        $visite->setStatut('en_cours'); // statut par défaut
 
         $em->persist($visite);
         $em->flush();

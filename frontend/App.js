@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; // 👈 Ajouté
+
 import LoginScreen from './screens/LoginScreen';
 import GuideHome from './screens/Guide/GuideHome';
 import AdminHome from './screens/Admin/AdminHome';
@@ -12,7 +13,11 @@ const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <PaperProvider>
+    <PaperProvider
+      settings={{
+        icon: props => <MaterialCommunityIcons {...props} />, // 👈 Ajouté
+      }}
+    >
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen 
