@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { TextInput, Button, Card, Title, Paragraph } from 'react-native-paper';
 import axios from 'axios';
-
-const API_BASE_URL = 'http://192.168.129.33:8000/api';
+import { API_BASE_URL } from './constants';
 
 export default function LoginScreen({ navigation }) {
   const [isRegistering, setIsRegistering] = useState(false);
