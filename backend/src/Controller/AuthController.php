@@ -1,5 +1,4 @@
-
-<?php
+﻿<?php
 
 namespace App\Controller;
 
@@ -26,10 +25,8 @@ class AuthController extends AbstractController
 
         $logger->info('Login attempt', [
             'email' => $email,
-            'password_length' => strlen($password),
-            'raw_data' => $data
+            'password_length' => strlen($password)
         ]);
-
         if (empty($email) || empty($password)) {
             $logger->warning('Empty email or password');
             return $this->json(['success' => false, 'message' => 'Email et mot de passe requis'], 400);

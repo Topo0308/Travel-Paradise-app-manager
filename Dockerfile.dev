@@ -1,10 +1,11 @@
+FROM node:18 AS base
 WORKDIR /app
 
 # Copier les fichiers de dépendances
 COPY package*.json ./
 
 # Installer les dépendances
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copier le reste du code
 COPY . .

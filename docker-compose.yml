@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8' # You can remove this line as per the warning
 
 services:
   postgres:
@@ -23,27 +23,54 @@ services:
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/travel_paradise
     volumes:
-      - ./backend:/var/www/html
+      - ./backend:/var/www/html # For development. For production, code should be copied into the image.
     networks:
       - travel_network
 
-  frontend:
-    build: 
+  frontend: # This is your Expo Mobile App service
+    build:
       context: ./frontend
+      # Assuming Dockerfile.dev is in ./frontend for Expo dev environment
+      # If you have a simple Dockerfile for just building, you might use that.
       dockerfile: Dockerfile.dev
     ports:
-      - "19000:19000"
-      - "19001:19001"
-      - "19002:19002"
+      - "19000:19000" # Metro Bundler
+      - "19001:19001" # Expo packager port
+      - "19002:19002" # Expo DevTools
+      # - "8081:8081" # Metro web UI, if Expo starts it on this port and you need it exposed
     depends_on:
       - backend
     environment:
       NODE_ENV: development
+      # This URL is for calls from within this container's build/runtime to the backend.
+      # For Expo Go app on your phone/emulator, you'll use http://<YOUR_HOST_IP>:8000/api in the app's code.
       REACT_APP_API_BASE_URL: http://backend:8000/api
-      EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0
+      EXPO_DEVTOOLS_LISTEN_ADDRESS: '0.0.0.0'
+      EXPO_METRO_LISTEN_ADDRESS: '0.0.0.0' # May help Metro listen correctly inside Docker
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - /app/node_modules # Good practice to keep node_modules in the volume
+    networks:
+      - travel_network
+
+  web: # NEW SERVICE for your Vite/React web application (from project root)
+    build:
+      context: . # Project root, where your root Dockerfile.dev and package.json are
+      dockerfile: Dockerfile.dev # Uses the Dockerfile.dev in the project root
+    ports:
+      - "3000:3000" # Exposes Vite dev server on host port 3000
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: development
+      # This VITE_API_BASE_URL is for the Vite app to talk to the backend.
+      # When running in Docker, http://backend:8000/api allows container-to-container communication.
+      # If your Vite app (running in browser at http://localhost:3000) makes direct calls,
+      # it would need to use http://localhost:8000/api (or setup proxy in vite.config.js).
+      VITE_API_BASE_URL: http://backend:8000/api
+    volumes:
+      - .:/app # Mounts project root into /app for Vite dev server
+      - /app/node_modules # Keeps container's node_modules separate from host's
     networks:
       - travel_network
 
