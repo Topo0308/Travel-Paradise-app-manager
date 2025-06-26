@@ -1,7 +1,7 @@
 
 // Configuration API pour l'environnement Docker
 export const API_CONFIG = {
-  BASE_URL: 'http://192.168.129.33:8000/api', // Backend Docker IP
+  BASE_URL: 'http://localhost:8000/api', // Backend Docker IP
   ENDPOINTS: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',

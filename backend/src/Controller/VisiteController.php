@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/visites')]
+#[Route('/visites')]
 class VisiteController extends AbstractController
 {
     #[Route('', name: 'get_visites', methods: ['GET'])]

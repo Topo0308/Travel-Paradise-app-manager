@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/guides')]
+#[Route('/guides')]
 class GuideController extends AbstractController
 {
     #[Route('', name: 'get_guides', methods: ['GET'])]

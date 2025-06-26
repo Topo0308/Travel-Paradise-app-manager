@@ -43,8 +43,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     
     console.log('🔑 Tentative de connexion...', { 
       email, 
-      url: buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN),
-      backend_ip: '192.168.129.33:8000'
+      url: buildApiUrl(API_CONFIG.ENDPOINTS.LOGIN)
     });
 
     try {
@@ -85,14 +84,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const testBackendConnection = async () => {
     try {
       console.log('🔍 Test de connexion au backend...');
-      const response = await fetch('http://192.168.129.33:8000/api', {
+      // Utilise BASE_URL de API_CONFIG pour le test de connexion
+      const response = await fetch(API_CONFIG.BASE_URL, {
         method: 'GET',
         ...API_OPTIONS,
       });
       console.log('🌐 Test de connexion backend:', {
         status: response.status,
         statusText: response.statusText,
-        accessible: response.ok
+        accessible: response.ok,
+        url: API_CONFIG.BASE_URL
       });
     } catch (error) {
       console.error('🚫 Test de connexion échoué:', error);
@@ -134,7 +135,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             Connexion à votre espace
           </p>
           <div className="text-xs text-gray-400 mt-2">
-            Backend: http://192.168.129.33:8000
+            Backend: {API_CONFIG.BASE_URL}
           </div>
         </CardHeader>
 

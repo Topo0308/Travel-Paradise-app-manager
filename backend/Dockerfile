@@ -37,5 +37,4 @@ RUN usermod -u 1000 www-data
 
 EXPOSE 8000
 
-CMD ["symfony", "server:start", "--no-tls", "--port=8000", "--allow-cors", "--dir=public", "--allow-all-ip"]
-
+CMD ["sh", "-c", "while true; do php -S 0.0.0.0:8000 -t public public/index.php || sleep 1; done"]
