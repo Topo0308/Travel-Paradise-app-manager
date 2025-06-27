@@ -17,6 +17,8 @@ RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
 
 # Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copie du fichier php.ini personnalisé
+COPY config/php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Installation de Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash
