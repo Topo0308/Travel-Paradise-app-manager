@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { Card, Title, Paragraph, Button, Text, Searchbar } from 'react-native-paper';
 import axios from 'axios';
+import { API_BASE_URL } from '../constants';
 
-const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function VisiteurHome({ route }) {
   const { user } = route.params;

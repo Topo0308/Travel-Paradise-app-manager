@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { Card, Title, Paragraph, Text, Appbar, Tabs, TabScreen } from 'react-native-paper';
 import axios from 'axios';
+import { API_BASE_URL } from '../constants';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+
 
 export default function AdminHome({ route }) {
   const { user } = route.params;

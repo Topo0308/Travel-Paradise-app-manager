@@ -151,14 +151,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               <AlertDescription className="text-green-600">{success}</AlertDescription>
             </Alert>
           )}
-
-          <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
-            <strong>Comptes de test :</strong><br/>
-            Admin: admin@test.com / password<br/>
-            Guide: guide@test.com / password<br/>
-            Visiteur: visiteur@test.com / password
-          </div>
-
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
